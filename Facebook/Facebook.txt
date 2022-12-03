@@ -1,0 +1,64 @@
+#NoTrayIcon
+#include <WindowsConstants.au3>
+#include <StaticConstants.au3>
+#include <GUIConstantsEx.au3>
+#include <EditConstants.au3>
+#include <GUIConstants.au3>
+#include <GDIPlus.au3>
+#include <String.au3>
+#Include <WinAPI.au3>
+#include <array.au3>
+#include <Misc.au3>
+#include <IE.au3>
+
+FBLogin()
+
+Func FBLogin()
+    
+Global $Enter = False
+
+Local $msg, $GUI_FBN, $GUI_FBP 
+
+$GUI = GUICreate("Facebook | Login", 385, 110)
+$GUI_Label1 = GUICtrlCreateLabel("Email Address:", 10, 28)
+$GUI_FBN = GUICtrlCreateInput("", 100, 25, 200, 20)
+$GUI_Label2 = GUICtrlCreateLabel("Login Password:", 10, 53)
+$GUI_FBP = GUICtrlCreateInput("", 100, 50, 200, 20, BitOR($ES_PASSWORD,$ES_AUTOHSCROLL))
+$GUI_Create = GUICtrlCreateButton("Login", 100, 75, 200, 20)
+$BACKGROUNDX = GuiCtrlCreatePic("Facebook.gif", 310 ,20 ,64, 64)
+GUICtrlSetState($BACKGROUNDX, $GUI_DISABLE) 
+GUISetState()
+HotKeySet("{Enter}", "EnterPressed")
+    While 1
+        $msg = GUIGetMsg()
+        If WinActive("Facebook | Login") Then
+            HotKeySet("{Enter}", "EnterPressed")
+        Else
+            HotKeySet("{Enter}")
+        EndIf
+        If $msg = -3 Then Exit
+        If $msg = $GUI_Create Or $Enter = True Then
+            Global $Enter = False
+            If GUICtrlRead($GUI_FBN) = "" Then
+                MsgBox(48, "Facebook | Error", "Fields are Blank, Please Fill in the Fields...")
+            Else
+                $1 = GUICtrlRead($GUI_FBN)
+                $2 = GUICtrlRead($GUI_FBP)
+                $timeout = 5000
+                _IEErrorHandlerRegister()
+                _IELoadWaitTimeout($timeout)
+                $oIE = _IECreate("http://www.facebook.com/login.php")
+                $oHWND = _IEPropertyGet($oIE, "hwnd")
+                WinSetState($oHWND, "", @SW_MAXIMIZE)
+                $oForm = _IEFormGetObjByName($oIE, "login_form")
+                $oQuery = _IEFormElementGetObjByName($oForm, "email")
+                $o_Query = _IEFormElementGetObjByName($oForm, "pass")
+                $oSubmit = _IEFormElementGetObjByName($oForm, "login")
+            _IEFormElementSetValue($oQuery, $1)
+            _IEFormElementSetValue($o_Query, $2)
+            _IEAction($oSubmit, "click") 
+        ExitLoop
+    EndIf
+EndIf
+WEnd
+EndFunc ;FBLgin()
